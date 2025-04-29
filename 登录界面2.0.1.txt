@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录/注册</title>
+    <style>
+        /* 原有CSS样式保持不变 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        /* 其他样式保持不变... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchForm('login')">登录</div>
+            <div class="tab" onclick="switchForm('register')">注册</div>
+        </div>
+
+        <form id="loginForm" class="form active">
+            <div class="form-group">
+                <input type="text" id="loginUsername" placeholder="用户名" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="密码" required>
+            </div>
+            <button type="submit">登录</button>
+        </form>
+
+        <form id="registerForm" class="form">
+            <div class="form-group">
+                <input type="text" id="regUsername" placeholder="用户名" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="regEmail" placeholder="邮箱" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="regPassword" placeholder="密码" required>
+            </div>
+            <button type="submit">注册</button>
+        </form>
+    </div>
+
+    <script>
+        // 初始化用户存储
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        
+        // 获取返回地址
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl') || 'index.html';
+
+        // 登录处理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if(user) {
+                // 保存登录状态
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                // 返回原页面
+                window.location.href = returnUrl;
+            } else {
+                alert('用户名或密码错误！');
+            }
+        });
+
+        // 注册处理
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if(users.some(u => u.username === username)) {
+                alert('用户名已存在！');
+                return;
+            }
+
+            const newUser = {
+                username,
+                email,
+                password,
+                registerDate: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // 模拟管理员通知
+            notifyAdmin(newUser);
+            
+            alert('注册成功！请登录');
+            switchForm('login');
+        });
+
+        // 模拟管理员通知（实际需要对接API）
+        function notifyAdmin(user) {
+            // 这里可以替换为真实的API调用
+            console.log(`新用户注册通知：
+            用户名：${user.username}
+            邮箱：${user.email}
+            注册时间：${new Date(user.registerDate).toLocaleString()}`);
