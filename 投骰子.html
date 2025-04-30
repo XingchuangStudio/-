@@ -1,0 +1,149 @@
+05.01 00:08
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>骰子游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: #ffffff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dot {
+            width: 15px;
+            height: 15px;
+            background-color: #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .stats {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>骰子游戏</h1>
+        <div class="dice" id="dice">
+            <!-- 骰子点数通过JavaScript动态生成 -->
+        </div>
+        <button onclick="rollDice()">投掷骰子</button>
+        <div class="stats">
+            <p>当前点数：<span id="current">-</span></p>
+            <p>总投掷次数：<span id="totalRolls">0</span></p>
+            <p>历史记录：<span id="history">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        let totalRolls = 0;
+        const history = [];
+
+        function createDots(number) {
+            const dice = document.getElementById('dice');
+            dice.innerHTML = '';
+            dice.classList.add('shake');
+
+            // 不同点数对应的骰子布局
+            const dotPositions = {
+                1: [[2,2]],
+                2: [[1,1], [3,3]],
+                3: [[1,1], [2,2], [3,3]],
+                4: [[1,1], [1,3], [3,1], [3,3]],
+                5: [[1,1], [1,3], [3,1], [3,3], [2,2]],
+                6: [[1,1], [1,2], [1,3], [3,1], [3,2], [3,3]]
+            };
+
+            dotPositions[number].forEach(pos => {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.left = `${pos[0]*30}%`;
+                dot.style.top = `${pos[1]*30}%`;
+                dice.appendChild(dot);
+            });
+
+            // 移除动画类
+            setTimeout(() => dice.classList.remove('shake'), 500);
+        }
+
+        function updateStats(number) {
+            totalRolls++;
+            history.unshift(number);
+            if (history.length > 5) history.pop();
+
+            document.getElementById('current').textContent = number;
+            document.getElementById('totalRolls').textContent = totalRolls;
+            document.getElementById('history').textContent = history.join(', ');
+        }
+
+        function rollDice() {
+            const result = Math.floor(Math.random() * 6) + 1;
+            createDots(result);
+            updateStats(result);
+        }
+
+        // 初始加载时显示点数6
+        createDots(6);
+    </script>
+</body>
+</html>
